@@ -20,6 +20,14 @@ function channelLink(channelId) {
   return `https://discord.com/channels/${process.env.GUILD_ID}/${channelId}`;
 }
 
+function kazeEmbed(title, description) {
+  return new EmbedBuilder()
+    .setTitle(title)
+    .setDescription(description)
+    .setColor(RED)
+    .setFooter({ text: "Kaze Clan • Train hard, fight smart, win clean" });
+}
+
 const guides = {
   gvg: {
     name: "Guide to Guild War (GvG)",
@@ -77,10 +85,10 @@ const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 async function deployCommands() {
   await rest.put(
-   Routes.applicationGuildCommands(
-  process.env.CLIENT_ID,
-  process.env.GUILD_ID
-)
+    Routes.applicationGuildCommands(
+      process.env.CLIENT_ID,
+      process.env.GUILD_ID
+    ),
     { body: commands }
   );
 
@@ -95,16 +103,7 @@ client.once("clientReady", () => {
   console.log(`The Kaze Clan bot has awakened as ${client.user.tag}`);
 });
 
-function kazeEmbed(title, description) {
-  return new EmbedBuilder()
-    .setTitle(title)
-    .setDescription(description)
-    .setColor(RED)
-    .setFooter({ text: "Kaze Clan • Train hard, fight smart, win clean" });
-}
-
 client.on("interactionCreate", async (interaction) => {
-  // /guides
   if (interaction.isChatInputCommand() && interaction.commandName === "guides") {
     const menu = new StringSelectMenuBuilder()
       .setCustomId("guide_select")
@@ -146,7 +145,6 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  // /guides dropdown
   if (interaction.isStringSelectMenu() && interaction.customId === "guide_select") {
     const key = interaction.values[0];
     const selected = guides[key];
@@ -189,24 +187,7 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  // /gearcheck
   if (interaction.isChatInputCommand() && interaction.commandName === "gearcheck") {
-    const embed = kazeEmbed(
-      "🛡️ Kaze Clan Gear Readiness Check",
-      [
-        "Before you step through the Senkaimon and into Guild War, confirm your setup:",
-        "",
-        "✅ Mystic Skills are Level 6",
-        "✅ Inner Ways are fully leveled",
-        "✅ Attunements are aligned to your build",
-        "✅ Talent Tree is optimized",
-        "✅ Gear has been reviewed and tuned",
-        "✅ Buffs are ready",
-        "",
-        "**Remember:** raw power is useful, but discipline wins wars.",
-      ].join("\n")
-    );
-
     const readyButton = new ButtonBuilder()
       .setCustomId("gear_ready")
       .setLabel("I am battle-ready")
@@ -220,7 +201,23 @@ client.on("interactionCreate", async (interaction) => {
     const row = new ActionRowBuilder().addComponents(readyButton, notReadyButton);
 
     await interaction.reply({
-      embeds: [embed],
+      embeds: [
+        kazeEmbed(
+          "🛡️ Kaze Clan Gear Readiness Check",
+          [
+            "Before Guild War, confirm your setup:",
+            "",
+            "✅ Mystic Skills are Level 6",
+            "✅ Inner Ways are fully leveled",
+            "✅ Attunements are aligned to your build",
+            "✅ Talent Tree is optimized",
+            "✅ Gear has been reviewed and tuned",
+            "✅ Buffs are ready",
+            "",
+            "**Remember:** raw power is useful, but discipline wins wars.",
+          ].join("\n")
+        ),
+      ],
       components: [row],
       ephemeral: true,
     });
@@ -245,13 +242,13 @@ client.on("interactionCreate", async (interaction) => {
           [
             `${interaction.user} has requested gear guidance. No shame in preparation — every captain started as a student.`,
             "",
-            "**Start with the Gear Guide:**",
+            "**Gear Guide:**",
             guides.gear.url,
             "",
-            "**Then study the Lvl 91 Sword Trial guides:**",
+            "**Lvl 91 Sword Trial Guides:**",
             ...guides.swordtrial.urls,
             "",
-            "**Update/check your profile here:**",
+            "**Guild Manager:**",
             guides.guildmanager.url,
           ].join("\n")
         ),
@@ -259,7 +256,6 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  // /support
   if (interaction.isChatInputCommand() && interaction.commandName === "support") {
     const menu = new StringSelectMenuBuilder()
       .setCustomId("support_menu")
@@ -301,7 +297,6 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  // /support dropdown
   if (interaction.isStringSelectMenu() && interaction.customId === "support_menu") {
     const choice = interaction.values[0];
     let embed;
@@ -330,7 +325,7 @@ client.on("interactionCreate", async (interaction) => {
           "📘 Gear Guide:",
           guides.gear.url,
           "",
-          "⚔️ Sword Trial:",
+          "⚔️ Sword Trial Guides:",
           ...guides.swordtrial.urls,
           "",
           "📍 #how-to-tune-gear",
@@ -393,7 +388,6 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.reply({ embeds: [embed], ephemeral: true });
   }
 
-  // /eventinfo
   if (interaction.isChatInputCommand() && interaction.commandName === "eventinfo") {
     const embed = new EmbedBuilder()
       .setTitle("📅 Kaze Clan Event Intel")
@@ -420,7 +414,6 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  // /quicklinks
   if (interaction.isChatInputCommand() && interaction.commandName === "quicklinks") {
     const embed = new EmbedBuilder()
       .setTitle("🧭 Kaze Clan Quicklinks")
@@ -440,7 +433,7 @@ client.on("interactionCreate", async (interaction) => {
       new ButtonBuilder()
         .setLabel("Welcome")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1494248990919884800")),
+        .setURL(channelLink("1494240512218239036")),
 
       new ButtonBuilder()
         .setLabel("Ranking System")
