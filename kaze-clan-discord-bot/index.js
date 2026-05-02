@@ -16,6 +16,10 @@ const {
 
 const RED = 0xff0000;
 
+function channelLink(channelId) {
+  return `https://discord.com/channels/${process.env.GUILD_ID}/${channelId}`;
+}
+
 const guides = {
   gvg: {
     name: "Guide to Guild War (GvG)",
@@ -52,15 +56,31 @@ const commands = [
     .setName("gearcheck")
     .setDescription("Check if you are ready to step onto the battlefield.")
     .toJSON(),
+
+  new SlashCommandBuilder()
+    .setName("support")
+    .setDescription("Get help navigating the Kaze Clan server.")
+    .toJSON(),
+
+  new SlashCommandBuilder()
+    .setName("eventinfo")
+    .setDescription("View upcoming events and the weekly schedule.")
+    .toJSON(),
+
+  new SlashCommandBuilder()
+    .setName("quicklinks")
+    .setDescription("Open the Kaze Clan interactive navigation hub.")
+    .toJSON(),
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 async function deployCommands() {
- await rest.put(
-  Routes.applicationCommands(process.env.CLIENT_ID),
-  { body: commands }
-);
+  await rest.put(
+    Routes.applicationCommands(process.env.CLIENT_ID),
+    { body: commands }
+  );
+
   console.log("Slash commands deployed.");
 }
 
@@ -68,7 +88,7 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
-client.once("ready", () => {
+client.once("clientReady", () => {
   console.log(`The Kaze Clan bot has awakened as ${client.user.tag}`);
 });
 
@@ -81,6 +101,7 @@ function kazeEmbed(title, description) {
 }
 
 client.on("interactionCreate", async (interaction) => {
+  // /guides
   if (interaction.isChatInputCommand() && interaction.commandName === "guides") {
     const menu = new StringSelectMenuBuilder()
       .setCustomId("guide_select")
@@ -122,6 +143,7 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
+  // /guides dropdown
   if (interaction.isStringSelectMenu() && interaction.customId === "guide_select") {
     const key = interaction.values[0];
     const selected = guides[key];
@@ -158,16 +180,13 @@ client.on("interactionCreate", async (interaction) => {
       embeds: [
         kazeEmbed(
           `📘 ${selected.name}`,
-          [
-            "Here you go, warrior. Use this well:",
-            "",
-            selected.url,
-          ].join("\n")
+          ["Here you go, warrior. Use this well:", "", selected.url].join("\n")
         ),
       ],
     });
   }
 
+  // /gearcheck
   if (interaction.isChatInputCommand() && interaction.commandName === "gearcheck") {
     const embed = kazeEmbed(
       "🛡️ Kaze Clan Gear Readiness Check",
@@ -234,6 +253,248 @@ client.on("interactionCreate", async (interaction) => {
           ].join("\n")
         ),
       ],
+    });
+  }
+
+  // /support
+  if (interaction.isChatInputCommand() && interaction.commandName === "support") {
+    const menu = new StringSelectMenuBuilder()
+      .setCustomId("support_menu")
+      .setPlaceholder("What do you need help with?")
+      .addOptions(
+        new StringSelectMenuOptionBuilder()
+          .setLabel("I’m new")
+          .setDescription("Help getting started")
+          .setValue("new"),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("I need gear help")
+          .setDescription("Gear, tuning, and Sword Trial help")
+          .setValue("gear"),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("I need war help")
+          .setDescription("Guild War preparation")
+          .setValue("war"),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Where are events?")
+          .setDescription("Calendar and event channels")
+          .setValue("events"),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Where do I post clips/photos?")
+          .setDescription("Media and sharing channels")
+          .setValue("media")
+      );
+
+    const row = new ActionRowBuilder().addComponents(menu);
+
+    await interaction.reply({
+      embeds: [
+        kazeEmbed(
+          "🧭 Kaze Clan Support",
+          "Tell me what you need, warrior. I’ll guide you."
+        ),
+      ],
+      components: [row],
+      ephemeral: true,
+    });
+  }
+
+  // /support dropdown
+  if (interaction.isStringSelectMenu() && interaction.customId === "support_menu") {
+    const choice = interaction.values[0];
+    let embed;
+
+    if (choice === "new") {
+      embed = kazeEmbed(
+        "🌱 Welcome to Kaze Clan",
+        [
+          "Start here:",
+          "",
+          "📍 #welcome-to-kaze",
+          "📍 #introduction",
+          "📍 #ranking-system",
+          "",
+          "Introduce yourself, learn the system, and find your role.",
+        ].join("\n")
+      );
+    }
+
+    if (choice === "gear") {
+      embed = kazeEmbed(
+        "⚙️ Gear Help",
+        [
+          "Sharpen your build here:",
+          "",
+          "📘 Gear Guide:",
+          guides.gear.url,
+          "",
+          "⚔️ Sword Trial:",
+          ...guides.swordtrial.urls,
+          "",
+          "📍 #how-to-tune-gear",
+        ].join("\n")
+      );
+    }
+
+    if (choice === "war") {
+      embed = kazeEmbed(
+        "⚔️ War Preparation",
+        [
+          "Prepare for battle:",
+          "",
+          "📘 GvG Guide:",
+          guides.gvg.url,
+          "",
+          "📍 #kaze-war-summoning",
+          "📍 #kaze-assembly-hall",
+          "",
+          "Use `/gearcheck` before entering war.",
+        ].join("\n")
+      );
+    }
+
+    if (choice === "events") {
+      embed = new EmbedBuilder()
+        .setTitle("📅 Events & Schedule")
+        .setDescription(
+          [
+            "Stay updated:",
+            "",
+            "📍 #up-coming-events",
+            "📍 #public-event-information",
+            "📍 #watch-night-planning",
+            "",
+            "See the weekly calendar below.",
+          ].join("\n")
+        )
+        .setImage(guides.calendar.url)
+        .setColor(RED)
+        .setFooter({ text: "Kaze Clan • Move with the squad, not alone" });
+    }
+
+    if (choice === "media") {
+      embed = kazeEmbed(
+        "🎥 Media & Sharing",
+        [
+          "Post your content here:",
+          "",
+          "📍 #in-game-clips",
+          "📍 #in-game-photo’s",
+          "📍 #irl-photo’s",
+          "📍 #guildie-creatives",
+          "",
+          "Show off your victories and creations.",
+        ].join("\n")
+      );
+    }
+
+    await interaction.reply({ embeds: [embed], ephemeral: true });
+  }
+
+  // /eventinfo
+  if (interaction.isChatInputCommand() && interaction.commandName === "eventinfo") {
+    const embed = new EmbedBuilder()
+      .setTitle("📅 Kaze Clan Event Intel")
+      .setDescription(
+        [
+          "The winds are shifting, warrior. Here’s where to stay informed:",
+          "",
+          "📍 #up-coming-events",
+          "📍 #public-event-information",
+          "📍 #watch-night-planning",
+          "",
+          "**Use these channels to stay aligned with the clan’s movements.**",
+          "",
+          "Below is the current weekly schedule:",
+        ].join("\n")
+      )
+      .setImage(guides.calendar.url)
+      .setColor(RED)
+      .setFooter({ text: "Kaze Clan • Move with the squad, not alone" });
+
+    await interaction.reply({
+      embeds: [embed],
+      ephemeral: false,
+    });
+  }
+
+  // /quicklinks
+  if (interaction.isChatInputCommand() && interaction.commandName === "quicklinks") {
+    const embed = new EmbedBuilder()
+      .setTitle("🧭 Kaze Clan Quicklinks")
+      .setDescription(
+        [
+          "Choose your path, warrior.",
+          "",
+          "Use the buttons below to jump directly to key clan areas.",
+          "",
+          "⚠️ Replace the placeholder channel IDs in the code before using this command.",
+        ].join("\n")
+      )
+      .setColor(RED)
+      .setFooter({ text: "Kaze Clan • Move with purpose" });
+
+    const row1 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Welcome")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1494248990919884800")),
+
+      new ButtonBuilder()
+        .setLabel("Ranking System")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1382303536502804531")),
+
+      new ButtonBuilder()
+        .setLabel("Guides")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1379824043292885072"))
+    );
+
+    const row2 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Upcoming Events")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1485170571959337094")),
+
+      new ButtonBuilder()
+        .setLabel("Public Events")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1494232037412962344")),
+
+      new ButtonBuilder()
+        .setLabel("Watch Night")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1487902921755463831"))
+    );
+
+    const row3 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("War Summoning")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1487605721729335296")),
+
+      new ButtonBuilder()
+        .setLabel("Assembly Hall")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1486915865017581699")),
+
+      new ButtonBuilder()
+        .setLabel("Redemption Codes")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink("1479302222486441995"))
+    );
+
+    const row4 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Guild Manager")
+        .setStyle(ButtonStyle.Link)
+        .setURL(guides.guildmanager.url)
+    );
+
+    await interaction.reply({
+      embeds: [embed],
+      components: [row1, row2, row3, row4],
+      ephemeral: true,
     });
   }
 });
