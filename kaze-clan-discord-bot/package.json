@@ -1,0 +1,21 @@
+{
+  "name": "kaze-clan-discord-bot",
+  "version": "1.0.0",
+  "description": "A BLEACH-themed Kaze Clan Discord bot for guides, gear checks, calendar access, and guild resources.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "discord",
+    "discord-bot",
+    "kaze-clan",
+    "where-winds-meet"
+  ],
+  "author": "Kaze Clan",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  }
+}
