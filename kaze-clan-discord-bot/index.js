@@ -16,6 +16,33 @@ const {
 
 const RED = 0xff0000;
 
+const CHANNELS = {
+  welcome: "1494248990919884800",
+  introduction: "1379823827806060704",
+  ranking: "1382303536502804531",
+
+  upcoming: "1485170571959337094",
+  publicEvents: "1494232037412962344",
+  watchNight: "1487902921755463831",
+
+  warSummoning: "1487605721729335296",
+  assembly: "1486915865017581699",
+
+  redemption: "1479302222486441995",
+
+  clips: "1450126556646346876",
+  ingamePhotos: "1450123041940963449",
+  irlPhotos: "1456219367816827026",
+  creatives: "1469590200496689278",
+
+  gearTune: "1497113698693681304",
+  guides: "1379824043292885072",
+};
+
+function ch(id) {
+  return `<#${id}>`;
+}
+
 function channelLink(channelId) {
   return `https://discord.com/channels/${process.env.GUILD_ID}/${channelId}`;
 }
@@ -84,13 +111,10 @@ const commands = [
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 async function deployCommands() {
-  // Deletes old global commands so duplicates disappear
-  await rest.put(
-    Routes.applicationCommands(process.env.CLIENT_ID),
-    { body: [] }
-  );
+  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+    body: [],
+  });
 
-  // Registers current commands only to your server
   await rest.put(
     Routes.applicationGuildCommands(
       process.env.CLIENT_ID,
@@ -121,18 +145,22 @@ client.on("interactionCreate", async (interaction) => {
           .setLabel("Guide to Guild War (GvG)")
           .setDescription("Battle doctrine for the clan")
           .setValue("gvg"),
+
         new StringSelectMenuOptionBuilder()
           .setLabel("Guide to Gear Minmaxing")
           .setDescription("Sharpen your build before battle")
           .setValue("gear"),
+
         new StringSelectMenuOptionBuilder()
           .setLabel("Lvl 91 Sword Trial Guides")
           .setDescription("Study the blade. Clear the trial.")
           .setValue("swordtrial"),
+
         new StringSelectMenuOptionBuilder()
           .setLabel("Kaze Clan Guild Manager")
           .setDescription("Open the clan command board")
           .setValue("guildmanager"),
+
         new StringSelectMenuOptionBuilder()
           .setLabel("Kaze Clan Weekly Calendar")
           .setDescription("See this week's clan schedule")
@@ -153,14 +181,19 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  if (interaction.isStringSelectMenu() && interaction.customId === "guide_select") {
+  if (
+    interaction.isStringSelectMenu() &&
+    interaction.customId === "guide_select"
+  ) {
     const key = interaction.values[0];
     const selected = guides[key];
 
     if (key === "calendar") {
       const embed = new EmbedBuilder()
         .setTitle("📅 Kaze Clan Weekly Calendar")
-        .setDescription("Here is the weekly formation schedule. Be on time, stay ready, and move as one.")
+        .setDescription(
+          "Here is the weekly formation schedule. Be on time, stay ready, and move as one."
+        )
         .setImage(selected.url)
         .setColor(RED)
         .setFooter({ text: "Kaze Clan • Discipline over ego" });
@@ -195,7 +228,10 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  if (interaction.isChatInputCommand() && interaction.commandName === "gearcheck") {
+  if (
+    interaction.isChatInputCommand() &&
+    interaction.commandName === "gearcheck"
+  ) {
     const readyButton = new ButtonBuilder()
       .setCustomId("gear_ready")
       .setLabel("I am battle-ready")
@@ -206,7 +242,10 @@ client.on("interactionCreate", async (interaction) => {
       .setLabel("I need guidance")
       .setStyle(ButtonStyle.Danger);
 
-    const row = new ActionRowBuilder().addComponents(readyButton, notReadyButton);
+    const row = new ActionRowBuilder().addComponents(
+      readyButton,
+      notReadyButton
+    );
 
     await interaction.reply({
       embeds: [
@@ -258,13 +297,19 @@ client.on("interactionCreate", async (interaction) => {
             "",
             "**Guild Manager:**",
             guides.guildmanager.url,
+            "",
+            "**Gear Tuning Channel:**",
+            ch(CHANNELS.gearTune),
           ].join("\n")
         ),
       ],
     });
   }
 
-  if (interaction.isChatInputCommand() && interaction.commandName === "support") {
+  if (
+    interaction.isChatInputCommand() &&
+    interaction.commandName === "support"
+  ) {
     const menu = new StringSelectMenuBuilder()
       .setCustomId("support_menu")
       .setPlaceholder("What do you need help with?")
@@ -273,18 +318,22 @@ client.on("interactionCreate", async (interaction) => {
           .setLabel("I’m new")
           .setDescription("Help getting started")
           .setValue("new"),
+
         new StringSelectMenuOptionBuilder()
           .setLabel("I need gear help")
           .setDescription("Gear, tuning, and Sword Trial help")
           .setValue("gear"),
+
         new StringSelectMenuOptionBuilder()
           .setLabel("I need war help")
           .setDescription("Guild War preparation")
           .setValue("war"),
+
         new StringSelectMenuOptionBuilder()
           .setLabel("Where are events?")
           .setDescription("Calendar and event channels")
           .setValue("events"),
+
         new StringSelectMenuOptionBuilder()
           .setLabel("Where do I post clips/photos?")
           .setDescription("Media and sharing channels")
@@ -305,7 +354,10 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  if (interaction.isStringSelectMenu() && interaction.customId === "support_menu") {
+  if (
+    interaction.isStringSelectMenu() &&
+    interaction.customId === "support_menu"
+  ) {
     const choice = interaction.values[0];
     let embed;
 
@@ -315,9 +367,9 @@ client.on("interactionCreate", async (interaction) => {
         [
           "Start here:",
           "",
-          "📍 #welcome-to-kaze",
-          "📍 #introduction",
-          "📍 #ranking-system",
+          `📍 ${ch(CHANNELS.welcome)}`,
+          `📍 ${ch(CHANNELS.introduction)}`,
+          `📍 ${ch(CHANNELS.ranking)}`,
           "",
           "Introduce yourself, learn the system, and find your role.",
         ].join("\n")
@@ -336,7 +388,8 @@ client.on("interactionCreate", async (interaction) => {
           "⚔️ Sword Trial Guides:",
           ...guides.swordtrial.urls,
           "",
-          "📍 #how-to-tune-gear",
+          `📍 ${ch(CHANNELS.gearTune)}`,
+          `📍 ${ch(CHANNELS.guides)}`,
         ].join("\n")
       );
     }
@@ -350,8 +403,8 @@ client.on("interactionCreate", async (interaction) => {
           "📘 GvG Guide:",
           guides.gvg.url,
           "",
-          "📍 #kaze-war-summoning",
-          "📍 #kaze-assembly-hall",
+          `📍 ${ch(CHANNELS.warSummoning)}`,
+          `📍 ${ch(CHANNELS.assembly)}`,
           "",
           "Use `/gearcheck` before entering war.",
         ].join("\n")
@@ -365,9 +418,9 @@ client.on("interactionCreate", async (interaction) => {
           [
             "Stay updated:",
             "",
-"📍 <#1485170571959337094>",
-"📍 <#1494232037412962344>",
-"📍 <#1487902921755463831>",
+            `📍 ${ch(CHANNELS.upcoming)}`,
+            `📍 ${ch(CHANNELS.publicEvents)}`,
+            `📍 ${ch(CHANNELS.watchNight)}`,
             "",
             "See the weekly calendar below.",
           ].join("\n")
@@ -383,10 +436,10 @@ client.on("interactionCreate", async (interaction) => {
         [
           "Post your content here:",
           "",
-          "📍 #in-game-clips",
-          "📍 #in-game-photo’s",
-          "📍 #irl-photo’s",
-          "📍 #guildie-creatives",
+          `📍 ${ch(CHANNELS.clips)}`,
+          `📍 ${ch(CHANNELS.ingamePhotos)}`,
+          `📍 ${ch(CHANNELS.irlPhotos)}`,
+          `📍 ${ch(CHANNELS.creatives)}`,
           "",
           "Show off your victories and creations.",
         ].join("\n")
@@ -396,16 +449,19 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.reply({ embeds: [embed], ephemeral: true });
   }
 
-  if (interaction.isChatInputCommand() && interaction.commandName === "eventinfo") {
+  if (
+    interaction.isChatInputCommand() &&
+    interaction.commandName === "eventinfo"
+  ) {
     const embed = new EmbedBuilder()
       .setTitle("📅 Kaze Clan Event Intel")
       .setDescription(
         [
           "The winds are shifting, warrior. Here’s where to stay informed:",
           "",
-          "📍 #up-coming-events",
-          "📍 #public-event-information",
-          "📍 #watch-night-planning",
+          `📍 ${ch(CHANNELS.upcoming)}`,
+          `📍 ${ch(CHANNELS.publicEvents)}`,
+          `📍 ${ch(CHANNELS.watchNight)}`,
           "",
           "**Use these channels to stay aligned with the clan’s movements.**",
           "",
@@ -422,16 +478,34 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  if (interaction.isChatInputCommand() && interaction.commandName === "quicklinks") {
+  if (
+    interaction.isChatInputCommand() &&
+    interaction.commandName === "quicklinks"
+  ) {
     const embed = new EmbedBuilder()
       .setTitle("🧭 Kaze Clan Quicklinks")
       .setDescription(
-  [
-    "Choose your path, warrior.",
-    "",
-    "Use the buttons below to move instantly across the clan domain.",
-  ].join("\n")
-)
+        [
+          "Step through the gates of Kaze. Choose your path.",
+          "",
+          `📌 Welcome: ${ch(CHANNELS.welcome)}`,
+          `🌱 Introduction: ${ch(CHANNELS.introduction)}`,
+          `🏯 Ranking System: ${ch(CHANNELS.ranking)}`,
+          "",
+          `📅 Events: ${ch(CHANNELS.upcoming)}`,
+          `📣 Public Events: ${ch(CHANNELS.publicEvents)}`,
+          `🌙 Watch Night: ${ch(CHANNELS.watchNight)}`,
+          "",
+          `⚔️ War Summoning: ${ch(CHANNELS.warSummoning)}`,
+          `🏛️ Assembly Hall: ${ch(CHANNELS.assembly)}`,
+          "",
+          `📘 Guides: ${ch(CHANNELS.guides)}`,
+          `⚙️ Gear Tuning: ${ch(CHANNELS.gearTune)}`,
+          `🎁 Redemption Codes: ${ch(CHANNELS.redemption)}`,
+          "",
+          "Move with purpose.",
+        ].join("\n")
+      )
       .setColor(RED)
       .setFooter({ text: "Kaze Clan • Move with purpose" });
 
@@ -439,54 +513,59 @@ client.on("interactionCreate", async (interaction) => {
       new ButtonBuilder()
         .setLabel("Welcome")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1494240512218239036")),
+        .setURL(channelLink(CHANNELS.welcome)),
 
       new ButtonBuilder()
-        .setLabel("Ranking System")
+        .setLabel("Ranking")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1382303536502804531")),
+        .setURL(channelLink(CHANNELS.ranking)),
 
       new ButtonBuilder()
         .setLabel("Guides")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1379824043292885072"))
+        .setURL(channelLink(CHANNELS.guides))
     );
 
     const row2 = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setLabel("Upcoming Events")
+        .setLabel("Events")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1485170571959337094")),
+        .setURL(channelLink(CHANNELS.upcoming)),
 
       new ButtonBuilder()
         .setLabel("Public Events")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1494232037412962344")),
+        .setURL(channelLink(CHANNELS.publicEvents)),
 
       new ButtonBuilder()
         .setLabel("Watch Night")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1487902921755463831"))
+        .setURL(channelLink(CHANNELS.watchNight))
     );
 
     const row3 = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setLabel("War Summoning")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1487605721729335296")),
+        .setURL(channelLink(CHANNELS.warSummoning)),
 
       new ButtonBuilder()
         .setLabel("Assembly Hall")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1486915865017581699")),
+        .setURL(channelLink(CHANNELS.assembly)),
 
       new ButtonBuilder()
-        .setLabel("Redemption Codes")
+        .setLabel("Codes")
         .setStyle(ButtonStyle.Link)
-        .setURL(channelLink("1479302222486441995"))
+        .setURL(channelLink(CHANNELS.redemption))
     );
 
     const row4 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Gear Tuning")
+        .setStyle(ButtonStyle.Link)
+        .setURL(channelLink(CHANNELS.gearTune)),
+
       new ButtonBuilder()
         .setLabel("Guild Manager")
         .setStyle(ButtonStyle.Link)
