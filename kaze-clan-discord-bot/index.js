@@ -84,6 +84,13 @@ const commands = [
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 async function deployCommands() {
+  // Deletes old global commands so duplicates disappear
+  await rest.put(
+    Routes.applicationCommands(process.env.CLIENT_ID),
+    { body: [] }
+  );
+
+  // Registers current commands only to your server
   await rest.put(
     Routes.applicationGuildCommands(
       process.env.CLIENT_ID,
@@ -92,7 +99,8 @@ async function deployCommands() {
     { body: commands }
   );
 
-  console.log("Slash commands deployed.");
+  console.log("Old global commands cleared.");
+  console.log("Guild slash commands deployed.");
 }
 
 const client = new Client({
