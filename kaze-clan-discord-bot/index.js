@@ -365,9 +365,9 @@ client.on("interactionCreate", async (interaction) => {
           [
             "Stay updated:",
             "",
-            "📍 #up-coming-events",
-            "📍 #public-event-information",
-            "📍 #watch-night-planning",
+"📍 <#1485170571959337094>",
+"📍 <#1494232037412962344>",
+"📍 <#1487902921755463831>",
             "",
             "See the weekly calendar below.",
           ].join("\n")
@@ -426,14 +426,12 @@ client.on("interactionCreate", async (interaction) => {
     const embed = new EmbedBuilder()
       .setTitle("🧭 Kaze Clan Quicklinks")
       .setDescription(
-        [
-          "Choose your path, warrior.",
-          "",
-          "Use the buttons below to jump directly to key clan areas.",
-          "",
-          "⚠️ Replace the placeholder channel IDs in the code before using this command.",
-        ].join("\n")
-      )
+  [
+    "Choose your path, warrior.",
+    "",
+    "Use the buttons below to move instantly across the clan domain.",
+  ].join("\n")
+)
       .setColor(RED)
       .setFooter({ text: "Kaze Clan • Move with purpose" });
 
