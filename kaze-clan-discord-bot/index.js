@@ -76,9 +76,9 @@ const guides = {
     url: "https://gmapp.me/kaze-clan",
   },
   calendar: {
-    name: "Kaze Clan Weekly Calendar",
-    url: "https://cdn.discordapp.com/attachments/1379823827806060704/1500558595626897488/Elegance_Weekly_Calendar.png?ex=69f8df98&is=69f78e18&hm=4b2eec71baede44a8e31002f10013ad29aed17ca36dcb6eaa5596463f4c9db3a&",
-  },
+  name: "Kaze Clan Weekly Calendar",
+  url: "https://cdn.discordapp.com/attachments/1379823827806060704/1500563618297806999/Elegance_Weekly_Calendar.png?ex=69f8e445&is=69f792c5&hm=819ddc9838ab3f4e471dca2b24ceecf02c748eab074654f7b4484f3aaa0ad799&",
+},
 };
 
 const commands = [
