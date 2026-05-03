@@ -77,7 +77,10 @@ const guides = {
   },
   calendar: {
     name: "Kaze Clan Weekly Calendar",
-    url: "https://cdn.discordapp.com/attachments/1379823827806060704/1496676061000241172/Elegance_Weekly_Calendar.png?ex=69f69d33&is=69f54bb3&hm=6cc3b41bc99ff931f477de295dd74c358a9389b090280861cc92b92e2bd32dda&",
+    url: "calendar: {
+  name: "Kaze Clan Weekly Calendar",
+  url: "https://cdn.discordapp.com/attachments/1379823827806060704/1500558595626897488/Elegance_Weekly_Calendar.png?ex=69f8df98&is=69f78e18&hm=4b2eec71baede44a8e31002f10013ad29aed17ca36dcb6eaa5596463f4c9db3a&",
+},",
   },
 };
 
