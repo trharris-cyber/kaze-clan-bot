@@ -75,10 +75,9 @@ const guides = {
     name: "Kaze Clan Guild Manager",
     url: "https://gmapp.me/kaze-clan",
   },
-calendar: {
-  name: "Kaze Clan Weekly Calendar",
-  url: "https://cdn.discordapp.com/attachments/1379823827806060704/1500558595626897488/Elegance_Weekly_Calendar.png?ex=69f8df98&is=69f78e18&hm=4b2eec71baede44a8e31002f10013ad29aed17ca36dcb6eaa5596463f4c9db3a&",
-},
+  calendar: {
+    name: "Kaze Clan Weekly Calendar",
+    url: "https://cdn.discordapp.com/attachments/1379823827806060704/1500558595626897488/Elegance_Weekly_Calendar.png?ex=69f8df98&is=69f78e18&hm=4b2eec71baede44a8e31002f10013ad29aed17ca36dcb6eaa5596463f4c9db3a&",
   },
 };
 
