@@ -71,6 +71,10 @@ const guides = {
       "https://www.youtube.com/watch?v=hab1etvhQ2g",
     ],
   },
+  heroesrealm: {
+  name: "Lvl 91 Heroes Realm Guide",
+  url: "https://www.youtube.com/watch?v=a3KyZGwiIvw",
+  },
   guildmanager: {
     name: "Kaze Clan Guild Manager",
     url: "https://gmapp.me/kaze-clan",
