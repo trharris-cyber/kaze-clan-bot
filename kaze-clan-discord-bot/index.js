@@ -159,7 +159,12 @@ client.on("interactionCreate", async (interaction) => {
           .setLabel("Lvl 91 Sword Trial Guides")
           .setDescription("Study the blade. Clear the trial.")
           .setValue("swordtrial"),
-
+       
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Lvl 91 Heroes Realm Guide")
+          .setDescription("Learn the Heroes Realm mechanics and strategies.")
+          .setValue("heroesrealm"),
+        
         new StringSelectMenuOptionBuilder()
           .setLabel("Kaze Clan Guild Manager")
           .setDescription("Open the clan command board")
