@@ -41,7 +41,7 @@ const CHANNELS = {
   guides: "1379824043292885072",
 };
 
-const BOT_REMINDER_CHANNEL_ID = process.env.1379408033439809596; 
+const BOT_REMINDER_CHANNEL_ID = process.env.BOT_REMINDER_CHANNEL_ID;
 
 const BOT_REMINDERS = [
   "Need a guide? Use `/guides` to open the Kaze Clan Scroll Archive.",
