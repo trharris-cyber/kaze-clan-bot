@@ -1,5 +1,7 @@
 require("dotenv").config();
 
+const cron = require("node-cron");
+
 const {
   Client,
   GatewayIntentBits,
@@ -38,6 +40,18 @@ const CHANNELS = {
   gearTune: "1497113698693681304",
   guides: "1379824043292885072",
 };
+
+const BOT_REMINDER_CHANNEL_ID = process.env.1379408033439809596; 
+
+const BOT_REMINDERS = [
+  "Need a guide? Use `/guides` to open the Kaze Clan Scroll Archive.",
+  "Lost in the server? Use `/quicklinks` to jump to major clan channels.",
+  "New to Kaze? Use `/support` and choose **I'm new**.",
+  "Preparing for Guild War? Use `/gearcheck` before stepping onto the battlefield.",
+  "Looking for events? Use `/eventinfo` to view the weekly calendar.",
+  "Need gear help? Use `/support` → I need gear help.",
+  "Need war help? Use `/support` → I need war help.",
+];
 
 function ch(id) {
   return `<#${id}>`;
@@ -135,8 +149,36 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
+async function postBotReminder() {
+  try {
+    const channel = await client.channels.fetch(BOT_REMINDER_CHANNEL_ID);
+
+    if (!channel) return;
+
+    const reminder =
+      BOT_REMINDERS[Math.floor(Math.random() * BOT_REMINDERS.length)];
+
+    await channel.send({
+      embeds: [
+        kazeEmbed(
+          "💡 Daily Kaze Bot Tip",
+          reminder
+        ),
+      ],
+    });
+
+    console.log("Daily reminder posted.");
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 client.once("clientReady", () => {
-  console.log(`The Kaze Clan bot has awakened as ${client.user.tag}`);
+    console.log(`The Kaze Clan bot has awakened as ${client.user.tag}`);
+
+    cron.schedule("0 10 * * *", postBotReminder);
+
+    console.log("Daily reminder scheduler loaded.");
 });
 
 client.on("interactionCreate", async (interaction) => {
