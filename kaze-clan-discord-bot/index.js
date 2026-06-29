@@ -14,6 +14,7 @@ const {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  PermissionFlagsBits,
 } = require("discord.js");
 
 const RED = 0xff0000;
@@ -141,6 +142,12 @@ const commands = [
     .setName("quicklinks")
     .setDescription("Open the Kaze Clan interactive navigation hub.")
     .toJSON(),
+
+  new SlashCommandBuilder()
+  .setName("kazetip")
+  .setDescription("Admin only: manually post a Kaze Sensei bot tip.")
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+  .toJSON(),
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
@@ -232,6 +239,35 @@ client.once("clientReady", () => {
 });
 
 client.on("interactionCreate", async (interaction) => {
+  if (
+  interaction.isChatInputCommand() &&
+  interaction.commandName === "kazetip"
+) {
+  if (!interaction.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
+    await interaction.reply({
+      embeds: [
+        kazeEmbed(
+          "⛔ Captain-Level Command",
+          "Only officers with **Manage Server** permission can use this command."
+        ),
+      ],
+      ephemeral: true,
+    });
+    return;
+  }
+
+  await postBotReminder();
+
+  await interaction.reply({
+    embeds: [
+      kazeEmbed(
+        "✅ Kaze Sensei Tip Posted",
+        "A helpful bot tip has been posted for the clan."
+      ),
+    ],
+    ephemeral: true,
+  });
+}
   if (interaction.isChatInputCommand() && interaction.commandName === "guides") {
     const menu = new StringSelectMenuBuilder()
       .setCustomId("guide_select")
@@ -265,9 +301,9 @@ client.on("interactionCreate", async (interaction) => {
         new StringSelectMenuOptionBuilder()
           .setLabel("Kaze Clan Weekly Calendar")
           .setDescription("See this week's clan schedule")
-          .setValue("calendar")
+          .setValue("calendar")   
       );
-
+    
     const row = new ActionRowBuilder().addComponents(menu);
 
     await interaction.reply({
