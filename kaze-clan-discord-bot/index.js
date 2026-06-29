@@ -146,7 +146,7 @@ const commands = [
   new SlashCommandBuilder()
   .setName("kazetip")
   .setDescription("Admin only: manually post a Kaze Sensei bot tip.")
-  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
   .toJSON(),
 ];
 
@@ -243,12 +243,16 @@ client.on("interactionCreate", async (interaction) => {
   interaction.isChatInputCommand() &&
   interaction.commandName === "kazetip"
 ) {
-  if (!interaction.memberPermissions.has(PermissionFlagsBits.ManageGuild)) {
+  if (
+  interaction.isChatInputCommand() &&
+  interaction.commandName === "kazetip"
+) {
+  if (!interaction.memberPermissions.has(PermissionFlagsBits.ManageChannels)) {
     await interaction.reply({
       embeds: [
         kazeEmbed(
-          "⛔ Captain-Level Command",
-          "Only officers with **Manage Server** permission can use this command."
+          "⛔ Officer Command",
+          "Only officers with the **Manage Channels** permission can use this command."
         ),
       ],
       ephemeral: true,
@@ -262,7 +266,7 @@ client.on("interactionCreate", async (interaction) => {
     embeds: [
       kazeEmbed(
         "✅ Kaze Sensei Tip Posted",
-        "A helpful bot tip has been posted for the clan."
+        "A new Kaze Sensei tip has been posted for the clan."
       ),
     ],
     ephemeral: true,
