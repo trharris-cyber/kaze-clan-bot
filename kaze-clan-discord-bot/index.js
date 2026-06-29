@@ -232,7 +232,6 @@ async function postBotReminder() {
 client.once("clientReady", () => {
   console.log(`The Kaze Clan bot has awakened as ${client.user.tag}`);
 
-  // Posts every morning at 9:00 AM server/host time.
   cron.schedule("0 9 * * *", postBotReminder);
 
   console.log("Kaze Sensei daily tip scheduler loaded.");
