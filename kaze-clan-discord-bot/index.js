@@ -44,14 +44,31 @@ const CHANNELS = {
 const BOT_REMINDER_CHANNEL_ID = process.env.BOT_REMINDER_CHANNEL_ID;
 
 const BOT_REMINDERS = [
-  "Need a guide? Use `/guides` to open the Kaze Clan Scroll Archive.",
-  "Lost in the server? Use `/quicklinks` to jump to major clan channels.",
-  "New to Kaze? Use `/support` and choose **I'm new**.",
-  "Preparing for Guild War? Use `/gearcheck` before stepping onto the battlefield.",
-  "Looking for events? Use `/eventinfo` to view the weekly calendar.",
-  "Need gear help? Use `/support` → I need gear help.",
-  "Need war help? Use `/support` → I need war help.",
+  "Use `/guides` to open the Kaze Clan Scroll Archive.",
+  "Use `/quicklinks` to jump directly to important clan channels.",
+  "Use `/support` if you are new, lost, or unsure where to go.",
+  "Use `/support` → **I'm new** for onboarding help.",
+  "Use `/support` → **I need gear help** for build and tuning resources.",
+  "Use `/support` → **I need war help** for Guild War resources.",
+  "Use `/eventinfo` to see the weekly calendar and event channels.",
+  "Use `/gearcheck` to confirm your setup before content.",
+  "Use `/guides` → **Lvl 91 Sword Trial Guides** for trial resources.",
+  "Use `/guides` → **Lvl 91 Heroes Realm Guide** for Heroes Realm help.",
 ];
+
+let lastReminderIndex = -1;
+
+function getRotatingReminder() {
+  if (BOT_REMINDERS.length === 1) return BOT_REMINDERS[0];
+
+  let index;
+  do {
+    index = Math.floor(Math.random() * BOT_REMINDERS.length);
+  } while (index === lastReminderIndex);
+
+  lastReminderIndex = index;
+  return BOT_REMINDERS[index];
+}
 
 function ch(id) {
   return `<#${id}>`;
@@ -172,13 +189,46 @@ async function postBotReminder() {
     console.error(err);
   }
 }
+async function postBotReminder() {
+  try {
+    if (!BOT_REMINDER_CHANNEL_ID) {
+      console.log("BOT_REMINDER_CHANNEL_ID is not set.");
+      return;
+    }
+
+    const channel = await client.channels.fetch(BOT_REMINDER_CHANNEL_ID);
+
+    if (!channel) {
+      console.log("Bot reminder channel not found.");
+      return;
+    }
+
+    await channel.send({
+      embeds: [
+        kazeEmbed(
+          "💡 Kaze Sensei Tip",
+          [
+            getRotatingReminder(),
+            "",
+            "A prepared clan moves as one blade.",
+          ].join("\n")
+        ),
+      ],
+    });
+
+    console.log("Kaze Sensei tip posted.");
+  } catch (error) {
+    console.error("Failed to post Kaze Sensei tip:", error);
+  }
+}
 
 client.once("clientReady", () => {
-    console.log(`The Kaze Clan bot has awakened as ${client.user.tag}`);
+  console.log(`The Kaze Clan bot has awakened as ${client.user.tag}`);
 
-    cron.schedule("0 10 * * *", postBotReminder);
+  // Posts every morning at 9:00 AM server/host time.
+  cron.schedule("0 9 * * *", postBotReminder);
 
-    console.log("Daily reminder scheduler loaded.");
+  console.log("Kaze Sensei daily tip scheduler loaded.");
 });
 
 client.on("interactionCreate", async (interaction) => {
