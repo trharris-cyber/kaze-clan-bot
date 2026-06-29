@@ -23,21 +23,16 @@ const CHANNELS = {
   welcome: "1494248990919884800",
   introduction: "1379823827806060704",
   ranking: "1382303536502804531",
-
   upcoming: "1485170571959337094",
   publicEvents: "1494232037412962344",
   watchNight: "1487902921755463831",
-
   warSummoning: "1487605721729335296",
   assembly: "1486915865017581699",
-
   redemption: "1479302222486441995",
-
   clips: "1450126556646346876",
   ingamePhotos: "1450123041940963449",
   irlPhotos: "1456219367816827026",
   creatives: "1469590200496689278",
-
   gearTune: "1497113698693681304",
   guides: "1379824043292885072",
 };
@@ -60,12 +55,10 @@ const BOT_REMINDERS = [
 let lastReminderIndex = -1;
 
 function getRotatingReminder() {
-  if (BOT_REMINDERS.length === 1) return BOT_REMINDERS[0];
-
   let index;
   do {
     index = Math.floor(Math.random() * BOT_REMINDERS.length);
-  } while (index === lastReminderIndex);
+  } while (index === lastReminderIndex && BOT_REMINDERS.length > 1);
 
   lastReminderIndex = index;
   return BOT_REMINDERS[index];
@@ -98,23 +91,20 @@ const guides = {
   },
   swordtrial: {
     name: "Lvl 91 Sword Trial Guides",
-    urls: [
-      "https://youtu.be/2cMzl_y0XLI?si=7I9i35zMm8coiu99",
-      "https://www.youtube.com/watch?v=hab1etvhQ2g",
-    ],
+    urls: ["https://www.youtube.com/watch?v=hab1etvhQ2g"],
   },
   heroesrealm: {
-  name: "Lvl 91 Heroes Realm Guide",
-  url: "https://www.youtube.com/watch?v=a3KyZGwiIvw",
+    name: "Lvl 91 Heroes Realm Guide",
+    url: "https://www.youtube.com/watch?v=a3KyZGwiIvw",
   },
   guildmanager: {
     name: "Kaze Clan Guild Manager",
     url: "https://gmapp.me/kaze-clan",
   },
   calendar: {
-  name: "Kaze Clan Weekly Calendar",
-  url: "https://cdn.discordapp.com/attachments/1379823827806060704/1500563618297806999/Elegance_Weekly_Calendar.png?ex=69f8e445&is=69f792c5&hm=819ddc9838ab3f4e471dca2b24ceecf02c748eab074654f7b4484f3aaa0ad799&",
-},
+    name: "Kaze Clan Weekly Calendar",
+    url: "https://cdn.discordapp.com/attachments/1379823827806060704/1500563618297806999/Elegance_Weekly_Calendar.png?ex=69f8e445&is=69f792c5&hm=819ddc9838ab3f4e471dca2b24ceecf02c748eab074654f7b4484f3aaa0ad799&",
+  },
 };
 
 const commands = [
@@ -144,10 +134,10 @@ const commands = [
     .toJSON(),
 
   new SlashCommandBuilder()
-  .setName("kazetip")
-  .setDescription("Admin only: manually post a Kaze Sensei bot tip.")
-  .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
-  .toJSON(),
+    .setName("kazetip")
+    .setDescription("Officer only: manually post a Kaze Sensei bot tip.")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
+    .toJSON(),
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
@@ -158,10 +148,7 @@ async function deployCommands() {
   });
 
   await rest.put(
-    Routes.applicationGuildCommands(
-      process.env.CLIENT_ID,
-      process.env.GUILD_ID
-    ),
+    Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
     { body: commands }
   );
 
@@ -173,29 +160,6 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
-async function postBotReminder() {
-  try {
-    const channel = await client.channels.fetch(BOT_REMINDER_CHANNEL_ID);
-
-    if (!channel) return;
-
-    const reminder =
-      BOT_REMINDERS[Math.floor(Math.random() * BOT_REMINDERS.length)];
-
-    await channel.send({
-      embeds: [
-        kazeEmbed(
-          "💡 Daily Kaze Bot Tip",
-          reminder
-        ),
-      ],
-    });
-
-    console.log("Daily reminder posted.");
-  } catch (err) {
-    console.error(err);
-  }
-}
 async function postBotReminder() {
   try {
     if (!BOT_REMINDER_CHANNEL_ID) {
@@ -214,11 +178,9 @@ async function postBotReminder() {
       embeds: [
         kazeEmbed(
           "💡 Kaze Sensei Tip",
-          [
-            getRotatingReminder(),
-            "",
-            "A prepared clan moves as one blade.",
-          ].join("\n")
+          [getRotatingReminder(), "", "A prepared clan moves as one blade."].join(
+            "\n"
+          )
         ),
       ],
     });
@@ -238,39 +200,32 @@ client.once("clientReady", () => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  if (
-  interaction.isChatInputCommand() &&
-  interaction.commandName === "kazetip"
-) {
-  if (
-  interaction.isChatInputCommand() &&
-  interaction.commandName === "kazetip"
-) {
-  if (!interaction.memberPermissions.has(PermissionFlagsBits.ManageChannels)) {
-    await interaction.reply({
+  if (interaction.isChatInputCommand() && interaction.commandName === "kazetip") {
+    if (!interaction.memberPermissions.has(PermissionFlagsBits.ManageChannels)) {
+      return interaction.reply({
+        embeds: [
+          kazeEmbed(
+            "⛔ Officer Command",
+            "Only officers with the **Manage Channels** permission can use this command."
+          ),
+        ],
+        ephemeral: true,
+      });
+    }
+
+    await postBotReminder();
+
+    return interaction.reply({
       embeds: [
         kazeEmbed(
-          "⛔ Officer Command",
-          "Only officers with the **Manage Channels** permission can use this command."
+          "✅ Kaze Sensei Tip Posted",
+          "A new Kaze Sensei tip has been posted for the clan."
         ),
       ],
       ephemeral: true,
     });
-    return;
   }
 
-  await postBotReminder();
-
-  await interaction.reply({
-    embeds: [
-      kazeEmbed(
-        "✅ Kaze Sensei Tip Posted",
-        "A new Kaze Sensei tip has been posted for the clan."
-      ),
-    ],
-    ephemeral: true,
-  });
-}
   if (interaction.isChatInputCommand() && interaction.commandName === "guides") {
     const menu = new StringSelectMenuBuilder()
       .setCustomId("guide_select")
@@ -280,36 +235,31 @@ client.on("interactionCreate", async (interaction) => {
           .setLabel("Guide to Guild War (GvG)")
           .setDescription("Battle doctrine for the clan")
           .setValue("gvg"),
-
         new StringSelectMenuOptionBuilder()
           .setLabel("Guide to Gear Minmaxing")
           .setDescription("Sharpen your build before battle")
           .setValue("gear"),
-
         new StringSelectMenuOptionBuilder()
           .setLabel("Lvl 91 Sword Trial Guides")
           .setDescription("Study the blade. Clear the trial.")
           .setValue("swordtrial"),
-       
         new StringSelectMenuOptionBuilder()
           .setLabel("Lvl 91 Heroes Realm Guide")
           .setDescription("Learn the Heroes Realm mechanics and strategies.")
           .setValue("heroesrealm"),
-        
         new StringSelectMenuOptionBuilder()
           .setLabel("Kaze Clan Guild Manager")
           .setDescription("Open the clan command board")
           .setValue("guildmanager"),
-
         new StringSelectMenuOptionBuilder()
           .setLabel("Kaze Clan Weekly Calendar")
           .setDescription("See this week's clan schedule")
-          .setValue("calendar")   
+          .setValue("calendar")
       );
-    
+
     const row = new ActionRowBuilder().addComponents(menu);
 
-    await interaction.reply({
+    return interaction.reply({
       embeds: [
         kazeEmbed(
           "📜 Kaze Clan Scroll Archive",
@@ -321,10 +271,7 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  if (
-    interaction.isStringSelectMenu() &&
-    interaction.customId === "guide_select"
-  ) {
+  if (interaction.isStringSelectMenu() && interaction.customId === "guide_select") {
     const key = interaction.values[0];
     const selected = guides[key];
 
@@ -338,12 +285,11 @@ client.on("interactionCreate", async (interaction) => {
         .setColor(RED)
         .setFooter({ text: "Kaze Clan • Discipline over ego" });
 
-      await interaction.reply({ embeds: [embed] });
-      return;
+      return interaction.reply({ embeds: [embed] });
     }
 
     if (selected.urls) {
-      await interaction.reply({
+      return interaction.reply({
         embeds: [
           kazeEmbed(
             `⚔️ ${selected.name}`,
@@ -355,10 +301,9 @@ client.on("interactionCreate", async (interaction) => {
           ),
         ],
       });
-      return;
     }
 
-    await interaction.reply({
+    return interaction.reply({
       embeds: [
         kazeEmbed(
           `📘 ${selected.name}`,
@@ -368,10 +313,7 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  if (
-    interaction.isChatInputCommand() &&
-    interaction.commandName === "gearcheck"
-  ) {
+  if (interaction.isChatInputCommand() && interaction.commandName === "gearcheck") {
     const readyButton = new ButtonBuilder()
       .setCustomId("gear_ready")
       .setLabel("I am battle-ready")
@@ -387,7 +329,7 @@ client.on("interactionCreate", async (interaction) => {
       notReadyButton
     );
 
-    await interaction.reply({
+    return interaction.reply({
       embeds: [
         kazeEmbed(
           "🛡️ Kaze Clan Gear Readiness Check",
@@ -411,7 +353,7 @@ client.on("interactionCreate", async (interaction) => {
   }
 
   if (interaction.isButton() && interaction.customId === "gear_ready") {
-    await interaction.reply({
+    return interaction.reply({
       embeds: [
         kazeEmbed(
           "✅ Warrior Confirmed",
@@ -422,7 +364,7 @@ client.on("interactionCreate", async (interaction) => {
   }
 
   if (interaction.isButton() && interaction.customId === "gear_not_ready") {
-    await interaction.reply({
+    return interaction.reply({
       embeds: [
         kazeEmbed(
           "🧭 Guidance Requested",
@@ -435,6 +377,9 @@ client.on("interactionCreate", async (interaction) => {
             "**Lvl 91 Sword Trial Guides:**",
             ...guides.swordtrial.urls,
             "",
+            "**Heroes Realm Guide:**",
+            guides.heroesrealm.url,
+            "",
             "**Guild Manager:**",
             guides.guildmanager.url,
             "",
@@ -446,10 +391,7 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  if (
-    interaction.isChatInputCommand() &&
-    interaction.commandName === "support"
-  ) {
+  if (interaction.isChatInputCommand() && interaction.commandName === "support") {
     const menu = new StringSelectMenuBuilder()
       .setCustomId("support_menu")
       .setPlaceholder("What do you need help with?")
@@ -458,22 +400,18 @@ client.on("interactionCreate", async (interaction) => {
           .setLabel("I’m new")
           .setDescription("Help getting started")
           .setValue("new"),
-
         new StringSelectMenuOptionBuilder()
           .setLabel("I need gear help")
-          .setDescription("Gear, tuning, and Sword Trial help")
+          .setDescription("Gear, tuning, and PvE guide help")
           .setValue("gear"),
-
         new StringSelectMenuOptionBuilder()
           .setLabel("I need war help")
           .setDescription("Guild War preparation")
           .setValue("war"),
-
         new StringSelectMenuOptionBuilder()
           .setLabel("Where are events?")
           .setDescription("Calendar and event channels")
           .setValue("events"),
-
         new StringSelectMenuOptionBuilder()
           .setLabel("Where do I post clips/photos?")
           .setDescription("Media and sharing channels")
@@ -482,7 +420,7 @@ client.on("interactionCreate", async (interaction) => {
 
     const row = new ActionRowBuilder().addComponents(menu);
 
-    await interaction.reply({
+    return interaction.reply({
       embeds: [
         kazeEmbed(
           "🧭 Kaze Clan Support",
@@ -494,10 +432,7 @@ client.on("interactionCreate", async (interaction) => {
     });
   }
 
-  if (
-    interaction.isStringSelectMenu() &&
-    interaction.customId === "support_menu"
-  ) {
+  if (interaction.isStringSelectMenu() && interaction.customId === "support_menu") {
     const choice = interaction.values[0];
     let embed;
 
@@ -527,6 +462,9 @@ client.on("interactionCreate", async (interaction) => {
           "",
           "⚔️ Sword Trial Guides:",
           ...guides.swordtrial.urls,
+          "",
+          "🏛️ Heroes Realm Guide:",
+          guides.heroesrealm.url,
           "",
           `📍 ${ch(CHANNELS.gearTune)}`,
           `📍 ${ch(CHANNELS.guides)}`,
@@ -586,13 +524,10 @@ client.on("interactionCreate", async (interaction) => {
       );
     }
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    return interaction.reply({ embeds: [embed], ephemeral: true });
   }
 
-  if (
-    interaction.isChatInputCommand() &&
-    interaction.commandName === "eventinfo"
-  ) {
+  if (interaction.isChatInputCommand() && interaction.commandName === "eventinfo") {
     const embed = new EmbedBuilder()
       .setTitle("📅 Kaze Clan Event Intel")
       .setDescription(
@@ -612,16 +547,13 @@ client.on("interactionCreate", async (interaction) => {
       .setColor(RED)
       .setFooter({ text: "Kaze Clan • Move with the squad, not alone" });
 
-    await interaction.reply({
+    return interaction.reply({
       embeds: [embed],
       ephemeral: false,
     });
   }
 
-  if (
-    interaction.isChatInputCommand() &&
-    interaction.commandName === "quicklinks"
-  ) {
+  if (interaction.isChatInputCommand() && interaction.commandName === "quicklinks") {
     const embed = new EmbedBuilder()
       .setTitle("🧭 Kaze Clan Quicklinks")
       .setDescription(
@@ -654,12 +586,10 @@ client.on("interactionCreate", async (interaction) => {
         .setLabel("Welcome")
         .setStyle(ButtonStyle.Link)
         .setURL(channelLink(CHANNELS.welcome)),
-
       new ButtonBuilder()
         .setLabel("Ranking")
         .setStyle(ButtonStyle.Link)
         .setURL(channelLink(CHANNELS.ranking)),
-
       new ButtonBuilder()
         .setLabel("Guides")
         .setStyle(ButtonStyle.Link)
@@ -671,12 +601,10 @@ client.on("interactionCreate", async (interaction) => {
         .setLabel("Events")
         .setStyle(ButtonStyle.Link)
         .setURL(channelLink(CHANNELS.upcoming)),
-
       new ButtonBuilder()
         .setLabel("Public Events")
         .setStyle(ButtonStyle.Link)
         .setURL(channelLink(CHANNELS.publicEvents)),
-
       new ButtonBuilder()
         .setLabel("Watch Night")
         .setStyle(ButtonStyle.Link)
@@ -688,12 +616,10 @@ client.on("interactionCreate", async (interaction) => {
         .setLabel("War Summoning")
         .setStyle(ButtonStyle.Link)
         .setURL(channelLink(CHANNELS.warSummoning)),
-
       new ButtonBuilder()
         .setLabel("Assembly Hall")
         .setStyle(ButtonStyle.Link)
         .setURL(channelLink(CHANNELS.assembly)),
-
       new ButtonBuilder()
         .setLabel("Codes")
         .setStyle(ButtonStyle.Link)
@@ -705,14 +631,13 @@ client.on("interactionCreate", async (interaction) => {
         .setLabel("Gear Tuning")
         .setStyle(ButtonStyle.Link)
         .setURL(channelLink(CHANNELS.gearTune)),
-
       new ButtonBuilder()
         .setLabel("Guild Manager")
         .setStyle(ButtonStyle.Link)
         .setURL(guides.guildmanager.url)
     );
 
-    await interaction.reply({
+    return interaction.reply({
       embeds: [embed],
       components: [row1, row2, row3, row4],
       ephemeral: true,
