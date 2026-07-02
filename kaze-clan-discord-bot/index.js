@@ -146,10 +146,6 @@ const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 async function deployCommands() {
   console.log("Clearing old slash commands...");
 
-  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-    body: [],
-  });
-
   await rest.put(
     Routes.applicationGuildCommands(
       process.env.CLIENT_ID,
@@ -158,17 +154,18 @@ async function deployCommands() {
     { body: [] }
   );
 
-  console.log("Registering guild commands...");
+  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+    body: [],
+  });
 
-  await rest.put(
-    Routes.applicationGuildCommands(
-      process.env.CLIENT_ID,
-      process.env.GUILD_ID
-    ),
-    { body: commands }
-  );
+  console.log("Registering global slash commands...");
 
-  console.log(`✅ Successfully registered ${commands.length} guild commands.`);
+  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+    body: commands,
+  });
+
+  console.log(`✅ Successfully registered ${commands.length} global commands.`);
+  console.log(commands.map((command) => command.name));
 }
 
 const client = new Client({
