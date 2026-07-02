@@ -56,6 +56,7 @@ let lastReminderIndex = -1;
 
 function getRotatingReminder() {
   let index;
+
   do {
     index = Math.floor(Math.random() * BOT_REMINDERS.length);
   } while (index === lastReminderIndex && BOT_REMINDERS.length > 1);
@@ -144,16 +145,11 @@ const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 
 async function deployCommands() {
   await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-    body: [],
+    body: commands,
   });
 
-  await rest.put(
-    Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
-    { body: commands }
-  );
-
-  console.log("Old global commands cleared.");
-  console.log("Guild slash commands deployed.");
+  console.log(`Registered ${commands.length} global slash commands.`);
+  console.log(commands.map((command) => command.name));
 }
 
 const client = new Client({
